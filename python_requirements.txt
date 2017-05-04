@@ -1,0 +1,6 @@
+# Comment
+pandas
+jupyter
+pygments
+pandoc
+setools>=4.0

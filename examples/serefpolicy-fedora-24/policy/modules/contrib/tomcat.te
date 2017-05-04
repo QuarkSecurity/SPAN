@@ -1,0 +1,69 @@
+policy_module(tomcat, 1.0.0)
+
+########################################
+#
+# Declarations
+#
+
+attribute tomcat_domain;
+
+tomcat_domain_template(tomcat)
+
+type tomcat_unit_file_t;
+systemd_unit_file(tomcat_unit_file_t)
+
+#######################################
+#
+# tomcat local policy
+#
+
+optional_policy(`
+	unconfined_domain(tomcat_t)
+')
+
+########################################
+#
+# tomcat domain local policy
+#
+
+allow tomcat_t self:process execmem;
+allow tomcat_t self:process { signal signull };
+
+allow tomcat_t self:tcp_socket { accept listen };
+allow tomcat_domain self:fifo_file rw_fifo_file_perms;
+allow tomcat_domain self:unix_stream_socket create_stream_socket_perms;
+
+# we want to stay in a new tomcat domain if we call tomcat binary from a script
+# initrc_t@tomcat_test_exec_t->tomcat_test_t@tomcat_exec_t->tomcat_test_t
+can_exec(tomcat_domain, tomcat_exec_t)
+
+kernel_read_network_state(tomcat_domain)
+
+corecmd_exec_bin(tomcat_domain)
+corecmd_exec_shell(tomcat_domain)
+
+corenet_tcp_bind_generic_node(tomcat_domain)
+corenet_udp_bind_generic_node(tomcat_domain)
+corenet_tcp_bind_http_port(tomcat_domain)
+corenet_tcp_bind_http_cache_port(tomcat_domain)
+corenet_tcp_bind_mxi_port(tomcat_domain)
+corenet_tcp_connect_http_port(tomcat_domain)
+corenet_tcp_connect_mxi_port(tomcat_domain)
+
+dev_read_rand(tomcat_domain)
+dev_read_urand(tomcat_domain)
+dev_read_sysfs(tomcat_domain)
+
+domain_use_interactive_fds(tomcat_domain)
+
+fs_getattr_all_fs(tomcat_domain)
+fs_read_hugetlbfs_files(tomcat_domain)
+
+
+auth_read_passwd(tomcat_domain)
+
+sysnet_dns_name_resolve(tomcat_domain)
+
+optional_policy(`
+	tomcat_search_lib(tomcat_domain)
+')
