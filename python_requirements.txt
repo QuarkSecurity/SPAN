@@ -4,3 +4,4 @@ jupyter
 pygments
 pandoc
 setools>=4.0
+sh
