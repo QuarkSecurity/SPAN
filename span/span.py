@@ -71,7 +71,7 @@ def _load_policy_from_section(config_section):
     if "binary" in config_section:
         p = load_policy(config_section["binary"])
     if "source" in config_section:
-        ps = load_policy_source(config_section["source"])
+        ps = load_refpolicy_source(config_section["source"])
 
     return p, ps
 
@@ -174,6 +174,8 @@ class Policy(se.SELinuxPolicy):
                                     "readahead_t", "rpm_t", "nmbd_t", "init_t", "initrc_t", "insmod_t", "mdadm_t",
                                     "devices_unconfined_type", "udev_t", "bootloader_t", "system_cronjob_t"]
     trusted_domain_types = []
+
+    domain_attribute = "domain"
 
     def terules_query_orig(self, **kwargs):
         if "ruletype" not in kwargs:
@@ -328,7 +330,7 @@ class Policy(se.SELinuxPolicy):
         for t in types:
             if isinstance(t, str):
                 t = self.lookup_type(t)
-            if "domain" in list(t.attributes()):
+            if self.domain_attribute in list(t.attributes()):
                 out.add(t)
         return out
 
@@ -781,7 +783,7 @@ def diff_to_html(diff_text):
 
 # PolicySource makes it easier to grep through the sources inside the notebook to
 # find the policy statements granting the access we care about.
-class PolicySource(object):
+class RefPolicySource(object):
     def __init__(self, path):
         self.path = path
         self.abspath = os.path.abspath(self.path)
@@ -833,8 +835,8 @@ class PolicySource(object):
         return self.diff_relative("/policy/constraints", other_source)
 
 
-def load_policy_source(path):
-    return PolicySource(path)
+def load_refpolicy_source(path):
+    return RefPolicySource(path)
 
 
 if __name__ == '__main__':
