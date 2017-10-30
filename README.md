@@ -32,6 +32,18 @@ Also note, that this all installs and works on MacOS as well. You will have to i
 source, but if you have a working development environment that is not difficult. Just make certain that you
 use master from SELinux userspace (https://github.com/SELinuxProject/selinux) and SETools.
 
+1. You must install coreutils and pandoc. We recommend using Home Brew (https://github.com/Homebrew/brew) to install these.
+1. You must install userspace SELinux using specific parameters to make so the library ends up in the correct place.
+
+```
+brew install coreutils pandoc
+# cd you your SELinux checkout
+cd libsepol
+sudo make DESTDIR=/usr/local PREFIX=/usr/local install
+```
+
+Then following the instructions described above in the Installation section.
+
 # Getting Started
 
 Go to examples and start Jupyter notebook: e.g., jupyter-notebook. This will open a browser window listing the
