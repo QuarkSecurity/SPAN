@@ -154,14 +154,14 @@ def collect_types(p, raw, expand_attrs=True):
     data = []
     for k in sorted(u.keys()):
         v = u[k]
-        data.append({"type": k, "conditional": None, "perms": v})
+        data.append({"Type": k, "Conditional": None, "Permissions": sorted(v)})
 
     for k in sorted(c.keys()):
         t, cond = k
         v = c[k]
-        data.append({"type": t, "conditional": cond, "perms": v})
+        data.append({"Type": t, "Conditional": cond, "Permissions": sorted(v)})
 
-    df = pd.DataFrame(data)[["type", "conditional", "perms"]]
+    df = pd.DataFrame(data)[["Type", "Conditional", "Permissions"]]
     df.style.applymap(dataframe_hide_none)
 
     return df
