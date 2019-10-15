@@ -59,6 +59,8 @@ file_r_perms = [x.perm for x in permmap.perms("file") if x.direction == "r"]
 file_classes = ["file", "blk_file", "chr_file", "lnk_file"]
 file_dir_classes = file_classes + ["dir"]
 
+all_object_classes = ['bluetooth_socket', 'netlink_audit_socket', 'tcp_socket', 'msgq', 'rose_socket', 'x_property', 'binder', 'db_procedure', 'dir', 'peer', 'tipc_socket', 'blk_file', 'chr_file', 'db_table', 'db_tuple', 'dbus', 'ipc', 'ipx_socket', 'lnk_file', 'netlink_connector_socket', 'process', 'atmsvc_socket', 'capability2', 'fd', 'nfc_socket', 'packet', 'socket', 'bridge_socket', 'cap_userns', 'fifo_file', 'file', 'node', 'process2', 'x_cursor', 'x_server', 'bpf', 'decnet_socket', 'irda_socket', 'phonet_socket', 'db_view', 'netlink_nflog_socket', 'rds_socket', 'sctp_socket', 'xdp_socket', 'key', 'netlink_netfilter_socket', 'ib_socket', 'netlink_iscsi_socket', 'netlink_tcpdiag_socket', 'unix_stream_socket', 'x_synthetic_event', 'db_database', 'db_language', 'kernel_service', 'netlink_route_socket', 'pppox_socket', 'x_extension', 'db_sequence', 'ieee802154_socket', 'infiniband_endport', 'netlink_rdma_socket', 'netrom_socket', 'shm', 'x_resource', 'llc_socket', 'netlink_selinux_socket', 'capability', 'mpls_socket', 'netlink_ip6fw_socket', 'cap2_userns', 'dccp_socket', 'iucv_socket', 'netlink_firewall_socket', 'sock_file', 'unix_dgram_socket', 'kcm_socket', 'netlink_kobject_uevent_socket', 'vsock_socket', 'db_blob', 'filesystem', 'netlink_xfrm_socket', 'rxrpc_socket', 'x_device', 'can_socket', 'db_schema', 'netlink_dnrt_socket', 'netlink_generic_socket', 'x_client', 'x_gc', 'atmpvc_socket', 'context', 'nscd', 'passwd', 'x_event', 'x_font', 'ax25_socket', 'netlink_scsitransport_socket', 'service', 'x25_socket', 'isdn_socket', 'key_socket', 'netif', 'packet_socket', 'memprotect', 'msg', 'qipcrtr_socket', 'tun_socket', 'udp_socket', 'appletalk_socket', 'netlink_crypto_socket', 'proxy', 'x_colormap', 'x_screen', 'rawip_socket', 'x_application_data', 'association', 'caif_socket', 'x_selection', 'db_column', 'netlink_socket', 'x_drawable', 'infiniband_pkey', 'sem', 'system', 'x_keyboard', 'alg_socket', 'icmp_socket', 'netlink_fib_lookup_socket', 'security', 'smc_socket', 'x_pointer']
+
 
 def load_policy(fname):
     return Policy(fname)
@@ -154,14 +156,14 @@ def collect_types(p, raw, expand_attrs=True):
     data = []
     for k in sorted(u.keys()):
         v = u[k]
-        data.append({"type": k, "conditional": None, "perms": v})
+        data.append({"Type": k, "Conditional": None, "Permissions": sorted(v)})
 
     for k in sorted(c.keys()):
         t, cond = k
         v = c[k]
-        data.append({"type": t, "conditional": cond, "perms": v})
+        data.append({"Type": t, "Conditional": cond, "Permissions": sorted(v)})
 
-    df = pd.DataFrame(data)[["type", "conditional", "perms"]]
+    df = pd.DataFrame(data)[["Type", "Conditional", "Permissions"]]
     df.style.applymap(dataframe_hide_none)
 
     return df
