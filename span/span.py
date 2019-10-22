@@ -852,11 +852,11 @@ class RefPolicySource(object):
         self.abspath = os.path.abspath(self.path)
         self.modules_path = self.path + "/policy/modules"
 
-    def grep(self, search_str, file_type, path=None):
+    def grep(self, search_str, file_type, path=None, extended=False):
         if path is None:
             path = self.path
-        return subprocess.run(["grep", "-r", "-n", "--include",
-                               file_type, search_str, "."], cwd=path, stdout=subprocess.PIPE,
+        return subprocess.run(["grep", "-r", "-n" ] + [ "--extended-regexp" ] * extended +
+                              [ "--include", file_type, search_str, "."], cwd=path, stdout=subprocess.PIPE,
                               stderr=subprocess.STDOUT).stdout.decode('utf-8')
 
     def diff(self, patha, pathb):
@@ -875,8 +875,8 @@ class RefPolicySource(object):
     def attr_def(self, name):
         return self.find_def("attribute " + name)
 
-    def file_contexts(self, type_name):
-        return self.grep(type_name, "*.fc", self.modules_path)
+    def file_contexts(self, type_name, extended=False):
+        return self.grep(type_name, "*.fc", self.modules_path, extended)
 
     def genfscon(self, fs_type):
         return self.find_def("genfscon " + fs_type)
