@@ -403,9 +403,9 @@ class Policy(se.SELinuxPolicy):
                 if row[2] == "":
                     unconditional.add(row.type)
                 else:
-                    if row.type not in conditional:
-                        conditional[row.type] = []
-                    conditional[row.type].append(row.conditional)
+                    if row.Type not in conditional:
+                        conditional[row.Type] = []
+                    conditional[row.Type].append(row.Conditional)
 
             return unconditional, conditional
 
