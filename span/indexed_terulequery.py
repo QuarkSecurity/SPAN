@@ -23,8 +23,8 @@ import re
 from setools import mixins, query, TypeAttributeQuery, TypeQuery
 from setools.descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 from setools.policyrep import IoctlSet, TERuletype
-from setools.policyrep.typeattr import Type, BaseType
-from setools.policyrep.exception import RuleUseError, RuleNotConditional
+from setools.policyrep import Type, BaseType
+from setools.policyrep import RuleUseError, RuleNotConditional
 from setools.util import match_regex, match_indirect_regex, match_regex_or_set
 
 class TERuleIndex(object):
