@@ -32,7 +32,7 @@ def compile_policy(source_file, mls=True, xen=False):
     """
     # create a temp file for the binary policy
     # and then have checkpolicy overwrite it.
-    fd, policy_path = tempfile.mkstemp()
+    fd, policy_path = tempfile.mkstemp(prefix="policy-", suffix=".bin")
     os.close(fd)
 
     if "USERSPACE_SRC" in os.environ:
