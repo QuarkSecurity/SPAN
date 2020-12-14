@@ -36,7 +36,7 @@ import re
 import pandas as pd
 import setools as se
 from IPython.display import display, Markdown
-from setools.policyrep.typeattr import TypeAttribute
+from setools.policyrep import TypeAttribute
 
 from . import indexed_terulequery
 
@@ -357,7 +357,7 @@ class Policy(se.SELinuxPolicy):
             unconditional = set()
             conditional = {}
             for row in result.itertuples():
-                if row[2] is "":
+                if row[2] == "":
                     unconditional.add(row.type)
                 else:
                     if row.type not in conditional:
@@ -767,10 +767,12 @@ packet_summary_template = """
 def str_repr(self):
     return str(self)
 
-
-se.policyrep.typeattr.BaseType.__repr__ = str_repr
-se.policyrep.terule.BaseTERule.__repr__ = str_repr
-se.policyrep.role.BaseRole.__repr__ = str_repr
+# Now that setools moved many of these over to cython, the monkey patching won't work
+# for these types. Just leaving this here as a reminder to do somethign about this at
+# some point in the future.
+#se.policyrep.BaseType.__repr__ = str_repr
+#se.policyrep.BaseTERule.__repr__ = str_repr
+#se.policyrep.BaseRole.__repr__ = str_repr
 
 import subprocess
 from pygments import highlight
