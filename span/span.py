@@ -36,7 +36,8 @@ import re
 import pandas as pd
 import setools as se
 from IPython.display import display, Markdown
-from setools.policyrep import TypeAttribute
+from setools.policyrep import Type as PolicyRepType
+from setools.policyrep import TypeAttribute as PolicyRepTypeAttribute
 
 from . import indexed_terulequery
 
@@ -155,19 +156,48 @@ def collect_types(p, raw, expand_attrs=True):
 
     data = []
     for k in sorted(u.keys()):
-        v = u[k]
-        data.append({"Type": k, "Conditional": None, "Permissions": sorted(v)})
+        v = u[k]        
+        data.append({"Type": Type(k), "Conditional": None, "Permissions": sorted(v)})
 
     for k in sorted(c.keys()):
         t, cond = k
         v = c[k]
-        data.append({"Type": t, "Conditional": cond, "Permissions": sorted(v)})
+        data.append({"Type": Type(t), "Conditional": cond, "Permissions": sorted(v)})
 
     df = pd.DataFrame(data)[["Type", "Conditional", "Permissions"]]
     df.style.applymap(dataframe_hide_none)
 
     return df
 
+class Delegator:
+    def __init__(self, child) -> None:
+        if isinstance(child, Delegator):
+            child = child.child
+        self.child = child
+
+    def __getattr__(self, name: str):
+        return getattr(self.child, name)
+
+
+class Type(Delegator):
+    def __repr__(self) -> str:
+        return self.name
+
+    def attributes(self):
+        attributes = self.child.attributes()
+        return [TypeAttribute(x) for x in attributes]
+
+class TypeAttribute(Delegator):
+    def __repr__(self) -> str:
+        return self.name
+
+def wrap(instance):
+    if isinstance(instance, PolicyRepType):
+        return Type(instance)
+    elif isinstance(instance, PolicyRepTypeAttribute):
+        return TypeAttribute(instance)
+    else:
+        return instance
 
 class Policy(se.SELinuxPolicy):
     # common trusted domain types we can filter out to remove noise
@@ -199,6 +229,11 @@ class Policy(se.SELinuxPolicy):
             filtered_results = [x for x in results if x.source not in td]
         else:
             filtered_results = results
+
+        if "trusted_target_types" in kwargs:
+            tt = kwargs["trusted_target_types"]
+            filtered_results = [x for x in filtered_results if x.target not in tt]
+
         return sorted(filtered_results)
 
     BASE_RULE_ATTRS = ["source", "target", "tclass"]
@@ -224,7 +259,7 @@ class Policy(se.SELinuxPolicy):
             row = {}
             for attr in self.BASE_RULE_ATTRS + attrs:
                 try:
-                    row[attr] = getattr(rule, attr)
+                    row[attr] = wrap(getattr(rule, attr))
                 except:
                     row[attr] = None
                     continue
@@ -278,7 +313,10 @@ class Policy(se.SELinuxPolicy):
     def types_re(self, s, **kwargs):
         q = se.TypeQuery(self, name_regex=True, **kwargs)
         q.name = s
-        return sorted(q.results())
+        return [Type(x) for x in sorted(q.results())]
+
+    def lookup_type(self, name):
+        return Type(super().lookup_type(name))
 
     def lookup_type_or_attrs(self, type_names):
         """
@@ -452,7 +490,8 @@ class Policy(se.SELinuxPolicy):
     def types_summary(self, types):
         data = []
         for t in sorted(types):
-            data.append({"name": str(t), "attributes": sorted(t.attributes())})
+            t = Type(t)
+            data.append({"name": str(t), "attributes": sorted([x.name for x in t.attributes()])})
 
         df = pd.DataFrame(data)[["name", "attributes"]]
         df.style.applymap(dataframe_hide_none)
