@@ -68,3 +68,5 @@ static/
 # VSCODE
 
 *.vscode
+
+.ipynb_checkpoints
