@@ -156,7 +156,7 @@ def collect_types(p, raw, expand_attrs=True):
 
     data = []
     for k in sorted(u.keys()):
-        v = u[k]        
+        v = u[k]
         data.append({"Type": Type(k), "Conditional": None, "Permissions": sorted(v)})
 
     for k in sorted(c.keys()):
@@ -177,6 +177,11 @@ class Delegator:
 
     def __getattr__(self, name: str):
         return getattr(self.child, name)
+
+    def __lt__(self, other):
+        if not hasattr(other, "child"):
+            return self.child < other
+        return self.child < other.child
 
 
 class Type(Delegator):
