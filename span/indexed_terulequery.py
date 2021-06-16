@@ -123,7 +123,15 @@ class CriteriaSetOrValueDescriptor(CriteriaDescriptor):
             if isinstance(value, self.value_types):
                 self.instances[obj] = lookup(value)
             else:
-                self.instances[obj] = set(lookup(v) for v in value)
+                try:
+                    resolved_values = set(lookup(v) for v in value)
+                except TypeError as e:
+                    if "not iterable" in str(e):
+                        resolved_values = set([lookup(value)])
+                    else:
+                        raise
+                self.instances[obj] = resolved_values
+
         elif self.enum_class:
             self.instances[obj] = set(self.enum_class.lookup(v) for v in value)
         else:

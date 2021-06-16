@@ -30,6 +30,7 @@
 #
 
 import configparser
+import os
 import os.path
 import re
 
@@ -40,6 +41,7 @@ from setools.policyrep import Type as PolicyRepType
 from setools.policyrep import TypeAttribute as PolicyRepTypeAttribute
 
 from . import indexed_terulequery
+from .util import compile_policy
 
 pd.options.display.max_rows = 2000
 pd.set_option('max_colwidth', 2000)
@@ -66,6 +68,11 @@ all_object_classes = ['bluetooth_socket', 'netlink_audit_socket', 'tcp_socket', 
 def load_policy(fname):
     return Policy(fname)
 
+def load_policy_from_source(fname):
+    binary_fname = compile_policy(fname)
+    p = Policy(binary_fname)
+    os.unlink(binary_fname)
+    return p
 
 def _load_policy_from_section(config_section):
     p = None
@@ -177,6 +184,14 @@ class Delegator:
 
     def __getattr__(self, name: str):
         return getattr(self.child, name)
+
+    def __hash__(self):
+        return hash(self.child)
+
+    def __eq__(self, other):
+        if not hasattr(other, "child"):
+            return self.child == other
+        return self.child == other.child
 
     def __lt__(self, other):
         if not hasattr(other, "child"):

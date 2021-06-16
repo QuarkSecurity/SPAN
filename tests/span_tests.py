@@ -6,7 +6,7 @@ import unittest
 
 from .test_context import span as se
 
-from setools.policyrep.typeattr import Type, TypeAttribute
+from setools.policyrep import Type, TypeAttribute
 
 class SENoteBookTests(unittest.TestCase):
     def setUp(self):
@@ -15,7 +15,7 @@ class SENoteBookTests(unittest.TestCase):
 
     def test_domain_types(self):
         self.assertEqual(len(self.p.domain_types()), 820)
-        self.assertEqual(len(self.p.domain_types(["passwd_t", "shadow_t"])), 816)
+        self.assertEqual(len(self.p.domain_types(["passwd_t", "shadow_t"])), 1)
 
     def test_custom_types(self):
         custom_types, custom_domains = self.p.new_types(self.bp)
@@ -81,31 +81,31 @@ class SENoteBookTests(unittest.TestCase):
         self.assertIsNotNone(bs.diff_constraints(ps))
 
     def test_object_info_flow(self):
-        p = se.load_policy("tests/minimal_policy.conf")
+        p = se.load_policy_from_source("tests/minimal_policy.conf")
 
         d = p.object_info_flow(object_type="fileb", tclass=["file"], direction="w")
         domains = ["domainb", "domaina", "domaina"]
         conditionals = ["None", "other_bool", "some_bool"]
         for r in d.itertuples():
-            self.assertEqual(r.Type, domains[r[0]])
+            self.assertEqual(r.Type.name, domains[r[0]])
             self.assertEqual(str(r.Conditional), conditionals[r[0]])
 
         d = p.object_info_flow(object_type="filea", tclass=["file"], direction="r")
         domains = ["sys_domain"]
         conditionals = ["None"]
         for r in d.itertuples():
-            self.assertEqual(r.Type, domains[r[0]])
+            self.assertEqual(r.Type.name, domains[r[0]])
             self.assertEqual(str(r.Conditional), conditionals[r[0]])
 
         d = p.object_info_flow(object_type="filea", tclass=["file"], direction="r", expand_attrs=True)
         domains = ["domaina", "domainc", "domaina", "domainc"]
         conditionals = ["None", "None", "some_bool", "some_bool"]
         for r in d.itertuples():
-            self.assertEqual(r.Type, domains[r[0]])
+            self.assertEqual(r.Type.name, domains[r[0]])
             self.assertEqual(str(r.Conditional), conditionals[r[0]])
 
     def test_domain_info_flow(self):
-        p = se.load_policy("tests/minimal_policy.conf")
+        p = se.load_policy_from_source("tests/minimal_policy.conf")
 
         d = p.domain_info_flow(domain="domaina", tclass=["file"], direction="w")
         files = ["fileb", "fileb"]
@@ -129,7 +129,7 @@ class SENoteBookTests(unittest.TestCase):
             self.assertEqual(str(r.Conditional), conditionals[r[0]])
 
     def test_domains_that_can_relabel(self):
-        p = se.load_policy("tests/minimal_policy.conf")
+        p = se.load_policy_from_source("tests/minimal_policy.conf")
 
         d = p.domains_that_can_relabel("relabel_from", "relabel_to")
         domains = ["diff_cond_relabel_domain", "partial_relabel_domain", "partial_relabel_domainb", "relabel_domain", "same_cond_relabel_domain"]
